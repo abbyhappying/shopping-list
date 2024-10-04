@@ -6,6 +6,7 @@ const itemFilter  = document.getElementById('filter');
 let isEditMode = false;
 const formBtn = itemForm.querySelector('button');
 
+
 // localStorage.clear();
 function displayItems() {
     const itemFromStorage = getItemFromStorage();
@@ -19,9 +20,21 @@ function OnAddItemSubmit(e) {
     if( newItem === '') {
         alert('Please add an item');
         return
-
     }
-
+    // check for edit mode
+    if(isEditMode) {
+        const editText = itemList.querySelector('.edit-mode');
+        removeItemFromStorage(editText.textContent);
+        editText.classList.remove('edit-mode');
+        editText.remove();
+        isEditMode = false;
+        }
+    else {
+        if(checkIfItemExists(newItem)) {
+            alert('This item already exists!');
+            return;
+        }
+        }
     addItemToDom(newItem);
 
     addItemToStorage(newItem);
@@ -96,12 +109,24 @@ function OnClickItem(e) {
     }
 }
 
+function checkIfItemExists(item) {
+    const itemFromStorage = getItemFromStorage();
+    console.log('itemFromStorage is :'+itemFromStorage);
+    return itemFromStorage.includes(item);
+}
+
 function setItemToEdit(item) {
     isEditMode = true;
+    itemList.querySelectorAll('li').forEach( item=> {
+        item.classList.remove('edit-mode');
+    })
+
     item.classList.add('edit-mode');
     formBtn.innerHTML = '<i class="fa-solid fa-pen"></i>Update Item'
     formBtn.style.backgroundColor = '#228B22';
     itemInput.value = item.textContent;
+
+
 }
 
 function removeItem(item) {
@@ -135,10 +160,6 @@ function clearItem() {
 
 
 function checkUl() {
-    // if (itemList.children.length === 0) {
-    //     clearBtn.style.display = 'none';  // Hide the button when no items are present
-    //     itemFilter.style.display = 'none';
-    // }
     const items = itemList.querySelectorAll('li');
     // console.log(items);
     if (items.length === 0) {
@@ -152,7 +173,9 @@ function checkUl() {
     // console.log(itemList.children.length);
     // console.log(items.length);
 
-
+    formBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Item'
+    formBtn.style.backgroundColor = '#333';
+    isEditMode = false;
 }
 
 function filterItem(e) {
@@ -175,7 +198,6 @@ function init() {
     itemList.addEventListener('click',OnClickItem);
     clearBtn.addEventListener('click',clearItem);
     itemFilter.addEventListener('input',filterItem);
-
 
     document.addEventListener('DOMContentLoaded',displayItems);
 
